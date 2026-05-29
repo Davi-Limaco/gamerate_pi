@@ -134,6 +134,76 @@ router.get('/me/notificacoes', authRequired, async (req, res) => {
   }
 });
 
+// GET /api/usuarios/buscar?q=
+router.get('/buscar', async (req, res) => {
+  const { q = '' } = req.query;
+  if (!q.trim()) return res.json([]);
+
+  try {
+    const r = await pool.query(
+      `SELECT u.id_usuario, u.nome_usuario, p.nome_perfil,
+              (SELECT COUNT(*)::int FROM avaliacao WHERE id_usuario_fk = u.id_usuario) AS total_avaliacoes,
+              (SELECT COUNT(*)::int FROM usuario_seguidor WHERE id_usuario_fk = u.id_usuario) AS total_seguidores
+       FROM usuario u
+       JOIN perfil p ON p.id_perfil = u.id_perfil_fk
+       WHERE u.nome_usuario ILIKE $1
+       ORDER BY total_avaliacoes DESC
+       LIMIT 8`,
+      [`%${q.trim()}%`]
+    );
+    res.json(r.rows);
+  } catch (err) {
+    console.error(err.message);
+    res.status(500).json({ erro: 'Erro interno' });
+  }
+});
+
+// GET /api/usuarios/:id — perfil público
+router.get('/:id', async (req, res) => {
+  const id = parseInt(req.params.id);
+  if (isNaN(id)) return res.status(400).json({ erro: 'ID inválido' });
+
+  try {
+    const r = await pool.query(
+      `SELECT u.id_usuario, u.nome_usuario, u.data_criacao, p.nome_perfil
+       FROM usuario u
+       JOIN perfil p ON p.id_perfil = u.id_perfil_fk
+       WHERE u.id_usuario = $1`,
+      [id]
+    );
+
+    if (!r.rows.length) return res.status(404).json({ erro: 'Usuário não encontrado' });
+
+    const [aval, seg, seguindo, avaliacoes] = await Promise.all([
+      pool.query('SELECT COUNT(*)::int AS total FROM avaliacao WHERE id_usuario_fk = $1', [id]),
+      pool.query('SELECT COUNT(*)::int AS total FROM usuario_seguidor WHERE id_usuario_fk = $1', [id]),
+      pool.query('SELECT COUNT(*)::int AS total FROM usuario_seguidor WHERE id_seguidor_fk = $1', [id]),
+      pool.query(
+        `SELECT a.id_avaliacao, a.titulo, a.nota, a.data_publicacao,
+                j.id_jogo, j.nome_jogo, j.capa,
+                (SELECT COUNT(*)::int FROM curtida c WHERE c.id_avaliacao_fk = a.id_avaliacao) AS total_curtidas
+         FROM avaliacao a
+         JOIN jogo j ON j.id_jogo = a.id_jogo_fk
+         WHERE a.id_usuario_fk = $1
+         ORDER BY a.data_publicacao DESC
+         LIMIT 20`,
+        [id]
+      ),
+    ]);
+
+    res.json({
+      ...r.rows[0],
+      total_avaliacoes: aval.rows[0].total,
+      total_seguidores: seg.rows[0].total,
+      total_seguindo: seguindo.rows[0].total,
+      avaliacoes: avaliacoes.rows,
+    });
+  } catch (err) {
+    console.error(err.message);
+    res.status(500).json({ erro: 'Erro interno' });
+  }
+});
+
 // POST /api/usuarios/:id/seguir
 router.post('/:id/seguir', authRequired, async (req, res) => {
   const alvo = parseInt(req.params.id);
@@ -163,6 +233,21 @@ router.post('/:id/seguir', authRequired, async (req, res) => {
     );
 
     res.json({ seguindo: true });
+  } catch (err) {
+    console.error(err.message);
+    res.status(500).json({ erro: 'Erro interno' });
+  }
+});
+
+// GET /api/usuarios/:id/eu-sigo — checa se o usuário autenticado segue :id
+router.get('/:id/eu-sigo', authRequired, async (req, res) => {
+  const alvo = parseInt(req.params.id);
+  try {
+    const r = await pool.query(
+      'SELECT 1 FROM usuario_seguidor WHERE id_seguidor_fk=$1 AND id_usuario_fk=$2',
+      [req.usuario.id, alvo]
+    );
+    res.json({ seguindo: r.rows.length > 0 });
   } catch (err) {
     console.error(err.message);
     res.status(500).json({ erro: 'Erro interno' });
