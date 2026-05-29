@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+  <title>GameRate — Perfil</title>
+  <link rel="stylesheet" href="../css/shared.css"/>
+  <style>
+    .perfil-wrap{max-width:900px;margin:0 auto;padding:40px 24px;position:relative;z-index:1;}
+    .perfil-card{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:32px;display:flex;gap:28px;align-items:center;margin-bottom:32px;flex-wrap:wrap;}
+    .perfil-avatar{width:72px;height:72px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:'Bebas Neue',sans-serif;font-size:32px;color:var(--bg);flex-shrink:0;}
+    .perfil-info{flex:1;}
+    .perfil-name{font-family:'Bebas Neue',sans-serif;font-size:36px;letter-spacing:1px;margin-bottom:4px;}
+    .perfil-sub{font-size:13px;color:var(--muted);margin-bottom:10px;}
+    .perfil-badge{display:inline-block;background:rgba(232,255,71,.1);border:1px solid rgba(232,255,71,.25);border-radius:30px;padding:3px 12px;font-size:11px;font-weight:600;color:var(--accent);letter-spacing:.5px;text-transform:uppercase;}
+    .perfil-stats{display:flex;gap:24px;flex-wrap:wrap;}
+    .perfil-stat{text-align:center;}
+    .perfil-stat-num{font-family:'Bebas Neue',sans-serif;font-size:28px;color:var(--text);}
+    .perfil-stat-label{font-size:11px;color:var(--muted);}
+    .perfil-actions{display:flex;gap:10px;align-items:center;flex-shrink:0;}
+    .btn-seguir{height:38px;padding:0 20px;border-radius:8px;font-family:'Outfit',sans-serif;font-weight:600;font-size:14px;cursor:pointer;border:1px solid var(--accent);background:var(--accent);color:var(--bg);transition:all .2s;display:inline-flex;align-items:center;gap:6px;}
+    .btn-seguir:hover{background:#d4eb2f;transform:translateY(-1px);}
+    .btn-seguir.seguindo{background:transparent;color:var(--text);border-color:var(--border);}
+    .btn-seguir.seguindo:hover{border-color:var(--accent2);color:var(--accent2);}
+    .btn-seguir:disabled{opacity:.5;cursor:default;transform:none;}
+    .hist-list{display:flex;flex-direction:column;gap:14px;}
+    .hist-card{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:16px;display:flex;gap:14px;align-items:center;cursor:pointer;transition:border-color .2s;}
+    .hist-card:hover{border-color:rgba(232,255,71,.2);}
+    .hist-capa{width:44px;height:58px;border-radius:6px;object-fit:cover;background:var(--surface2);flex-shrink:0;}
+    .hist-info{flex:1;min-width:0;}
+    .hist-game{font-size:14px;font-weight:600;}
+    .hist-titulo{font-size:13px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+    .hist-nota{font-family:'Bebas Neue',sans-serif;font-size:28px;color:var(--accent);}
+    .login-hint{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:14px 18px;font-size:13px;color:var(--muted);display:flex;align-items:center;gap:10px;}
+    .login-hint a{color:var(--accent);text-decoration:none;}
+    .login-hint a:hover{text-decoration:underline;}
+  </style>
+</head>
+<body>
+<header class="top-bar">
+  <a href="/index.html" class="logo">GAME<span>RATE</span></a>
+  <div class="search-wrap">
+    <svg class="ico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+    <input type="text" id="searchInput" placeholder="Pesquisar jogos ou jogadores..."/>
+    <div class="search-dropdown" id="searchDropdown"></div>
+  </div>
+  <nav class="nav-links">
+    <a href="/pages/catalogo.html">Jogos</a>
+    <a href="/pages/login.html"    class="guest-only">Login</a>
+    <a href="/pages/cadastro.html" class="guest-only btn-accent">Registrar</a>
+    <a href="/pages/perfil.html"   class="auth-only" style="display:none"><span class="nav-username"></span></a>
+    <a href="#" onclick="logout()" class="auth-only" style="display:none">Sair</a>
+  </nav>
+</header>
+
+<div class="page-wrap">
+  <div class="perfil-wrap">
+    <div class="perfil-card" id="perfilCard">
+      <div class="empty-state" style="width:100%"><div class="empty-icon">⏳</div><p>Carregando...</p></div>
+    </div>
+    <div id="avaliacoesSection">
+      <div class="empty-state"><div class="empty-icon">⏳</div><p>Carregando...</p></div>
+    </div>
+  </div>
+</div>
+
+<footer class="footer">
+  <a href="/index.html" class="footer-logo">GAME<span>RATE</span></a>
+  <div class="footer-links"><a href="/pages/contato.html">Contato</a></div>
+  <div class="footer-copy">© 2025 GameRate</div>
+</footer>
+
+<script src="/js/api.js"></script>
+<script>
+setupNav();
+
+const COLORS = ['#e8ff47','#ff4f4f','#47c5ff','#ff9f47','#a78bfa','#34d399'];
+function colorFor(name) { let h=0; for(let c of name) h+=c.charCodeAt(0); return COLORS[h%COLORS.length]; }
+
+const params  = new URLSearchParams(location.search);
+const uid     = parseInt(params.get('id'));
+const meUser  = (() => { try { return JSON.parse(localStorage.getItem('user')); } catch { return null; } })();
+
+if (!uid || isNaN(uid)) {
+  document.getElementById('perfilCard').innerHTML =
+    '<div class="empty-state" style="width:100%"><div class="empty-icon">❌</div><p>Usuário não encontrado.</p></div>';
+}
+
+// ── busca global ──────────────────────────────────────────────────
+initSearch(document.getElementById('searchInput'), document.getElementById('searchDropdown'));
+
+// ── seguir ───────────────────────────────────────────────────────
+let seguindo = false;
+
+async function toggleSeguir() {
+  const btn = document.getElementById('btnSeguir');
+  if (!btn) return;
+  btn.disabled = true;
+  try {
+    const r = await api.post(`/usuarios/${uid}/seguir`, {});
+    seguindo = r.seguindo;
+    atualizarBtnSeguir();
+    // Atualiza contador de seguidores
+    const el = document.getElementById('statSeguidores');
+    if (el) el.textContent = parseInt(el.textContent) + (seguindo ? 1 : -1);
+  } catch(e) {
+    toast(e.message, 'error');
+  } finally {
+    btn.disabled = false;
+  }
+}
+
+function atualizarBtnSeguir() {
+  const btn = document.getElementById('btnSeguir');
+  if (!btn) return;
+  if (seguindo) {
+    btn.textContent = '✓ Seguindo';
+    btn.classList.add('seguindo');
+    btn.title = 'Clique para deixar de seguir';
+  } else {
+    btn.textContent = '+ Seguir';
+    btn.classList.remove('seguindo');
+    btn.title = '';
+  }
+}
+
+async function checkSeguindo() {
+  if (!isLoggedIn()) return;
+  try {
+    const me = await api.get('/usuarios/me');
+    // Verifica via endpoint de seguir — checa tabela via busca de perfil próprio não exposta
+    // Alternativa: GET /api/usuarios/:id já retorna dados públicos; checamos via tentativa
+    // Usamos o endpoint de seguir com método HEAD não disponível, então checamos via perfil do me
+    // na verdade: fazemos uma chamada ao perfil público e vemos se o usuário me está na lista — não há esse campo
+    // Solução simples: tentamos um GET que lista quem eu sigo (não existe). 
+    // Vamos usar a abordagem de checar via query param na rota pública estendida.
+    // Por ora: a rota GET /api/usuarios/:id não retorna "estou seguindo". 
+    // Então faremos uma chamada POST e checamos a resposta — MAS isso togglaria.
+    // Melhor: adicionamos ?viewer= à rota pública — já está feito no backend estendido abaixo.
+    // Como não queremos alterar isso agora, usamos um fetch direto com token para checar.
+    const r = await fetch(`/api/usuarios/${uid}/seguindo-eu`, {
+      headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
+    });
+    if (r.ok) {
+      const d = await r.json();
+      seguindo = d.seguindo;
+      atualizarBtnSeguir();
+    }
+  } catch {}
+}
+
+async function loadPerfil() {
+  try {
+    const u = await api.get(`/usuarios/${uid}`);
+
+    // Verifica se é o próprio usuário logado
+    const ehMeu = isLoggedIn() && meUser &&
+      document.querySelector('.nav-username')?.textContent === u.nome_usuario;
+
+    const col = colorFor(u.nome_usuario);
+    const desde = new Date(u.data_criacao).toLocaleDateString('pt-BR', { month:'long', year:'numeric' });
+
+    let acoes = '';
+    if (!isLoggedIn()) {
+      acoes = `<div class="login-hint">
+        <span>🔒</span>
+        <span><a href="/pages/login.html">Faça login</a> para seguir este usuário</span>
+      </div>`;
+    } else if (!ehMeu) {
+      acoes = `<div class="perfil-actions">
+        <button class="btn-seguir" id="btnSeguir" onclick="toggleSeguir()">+ Seguir</button>
+      </div>`;
+    }
+
+    document.title = `GameRate — ${u.nome_usuario}`;
+
+    document.getElementById('perfilCard').innerHTML = `
+      <div class="perfil-avatar" style="background:${col}">${u.nome_usuario.slice(0,2).toUpperCase()}</div>
+      <div class="perfil-info">
+        <div class="perfil-name">${u.nome_usuario}</div>
+        <div class="perfil-sub">Membro desde ${desde}</div>
+        <span class="perfil-badge">${u.nome_perfil}</span>
+      </div>
+      <div class="perfil-stats">
+        <div class="perfil-stat">
+          <div class="perfil-stat-num">${u.total_avaliacoes}</div>
+          <div class="perfil-stat-label">Avaliações</div>
+        </div>
+        <div class="perfil-stat">
+          <div class="perfil-stat-num" id="statSeguidores">${u.total_seguidores}</div>
+          <div class="perfil-stat-label">Seguidores</div>
+        </div>
+        <div class="perfil-stat">
+          <div class="perfil-stat-num">${u.total_seguindo}</div>
+          <div class="perfil-stat-label">Seguindo</div>
+        </div>
+      </div>
+      ${acoes}`;
+
+    // Verificar se já estou seguindo
+    if (isLoggedIn() && !ehMeu) checkSeguindoViaLista(uid);
+
+    // Avaliações
+    const avsEl = document.getElementById('avaliacoesSection');
+    if (!u.avaliacoes.length) {
+      avsEl.innerHTML = '<div class="empty-state"><div class="empty-icon">🎮</div><p>Nenhuma avaliação ainda.</p></div>';
+    } else {
+      avsEl.innerHTML = `
+        <h3 style="font-family:'Bebas Neue',sans-serif;font-size:22px;letter-spacing:1px;margin-bottom:16px;color:var(--muted)">
+          AVALIAÇÕES <em style="color:var(--accent)">(${u.total_avaliacoes})</em>
+        </h3>
+        <div class="hist-list">
+          ${u.avaliacoes.map(a => `
+            <div class="hist-card" onclick="location.href='/pages/avaliacao.html?id=${a.id_avaliacao}'">
+              <img class="hist-capa" src="${a.capa||''}" alt="${a.nome_jogo}"
+                   onerror="this.style.background='var(--surface2)';this.src=''">
+              <div class="hist-info">
+                <div class="hist-game">${a.nome_jogo}</div>
+                <div class="hist-titulo">${a.titulo}</div>
+                <div style="font-size:11px;color:var(--muted);margin-top:4px">${fmtDate(a.data_publicacao)} · ♥ ${a.total_curtidas}</div>
+              </div>
+              <div class="hist-nota">${parseFloat(a.nota).toFixed(1)}</div>
+            </div>`).join('')}
+        </div>`;
+    }
+  } catch(e) {
+    document.getElementById('perfilCard').innerHTML =
+      `<div class="empty-state" style="width:100%"><div class="empty-icon">❌</div><p>${e.message}</p></div>`;
+  }
+}
+
+// Checa se já sigo via consulta rápida ao próprio perfil estendido
+async function checkSeguindoViaLista(targetId) {
+  try {
+    const token = localStorage.getItem('token');
+    if (!token) return;
+    const r = await fetch(`/api/usuarios/${targetId}/eu-sigo`, {
+      headers: { Authorization: `Bearer ${token}` }
+    });
+    if (r.ok) {
+      const d = await r.json();
+      seguindo = d.seguindo;
+      atualizarBtnSeguir();
+    }
+  } catch {}
+}
+
+loadPerfil();
+</script>
+</body>
+</html>
