@@ -69,6 +69,29 @@ router.get('/rpg-melhores', async (req, res) => {
   }
 });
  
+// GET /api/jogos
+router.get('/', async (req, res) => {
+  const {
+    search,
+    genero,
+    plataforma,
+    page = 1,
+    limit = 10,
+    ordem = 'data_lancamento',
+    dir = 'DESC',
+  } = req.query;
+
+  const ordens = ['nome_jogo', 'data_lancamento', 'nota_media', 'total_avaliacoes'];
+  const dirs = ['ASC', 'DESC'];
+  const safeOrd = ordens.includes(ordem) ? ordem : 'data_lancamento';
+  const safeDir = dirs.includes(dir.toUpperCase()) ? dir.toUpperCase() : 'DESC';
+  const limitInt = Math.max(1, parseInt(limit) || 10);
+  const offset = (Math.max(1, parseInt(page) || 1) - 1) * limitInt;
+
+  const conditions = ['1=1'];
+  const params = [];
+  let idx = 1;
+
   if (search) {
     conditions.push(`j.nome_jogo ILIKE $${idx++}`);
     params.push(`%${search}%`);
@@ -81,9 +104,9 @@ router.get('/rpg-melhores', async (req, res) => {
     conditions.push(`pl.nome_plataforma = $${idx++}`);
     params.push(plataforma);
   }
- 
+
   const where = 'WHERE ' + conditions.join(' AND ');
- 
+
   try {
     const [rows, cnt] = await Promise.all([
       pool.query(
@@ -98,7 +121,7 @@ router.get('/rpg-melhores', async (req, res) => {
          GROUP BY j.id_jogo
          ORDER BY CASE WHEN j.${safeOrd} IS NULL THEN 1 ELSE 0 END, j.${safeOrd} ${safeDir}
          LIMIT $${idx++} OFFSET $${idx++}`,
-        [...params, parseInt(limit), offset]
+        [...params, limitInt, offset]
       ),
       pool.query(
         `SELECT COUNT(DISTINCT j.id_jogo) AS total
@@ -111,7 +134,7 @@ router.get('/rpg-melhores', async (req, res) => {
         params
       ),
     ]);
- 
+
     res.json({ jogos: rows.rows, total: parseInt(cnt.rows[0].total) });
   } catch (err) {
     console.error('listagem error:', err.message);
