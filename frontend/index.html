@@ -129,10 +129,6 @@
       <div class="section-sub">Os títulos mais recentes catalogados</div>
     </div>
     <div style="display:flex;align-items:center;gap:16px">
-      <div class="scroll-btns">
-        <button class="scroll-btn" id="sL1">&#8592;</button>
-        <button class="scroll-btn" id="sR1">&#8594;</button>
-      </div>
       <a href="/pages/catalogo.html" class="see-all">Ver todos →</a>
     </div>
   </div>
@@ -148,10 +144,6 @@
       <div class="section-sub">Baseado na média das avaliações da comunidade</div>
     </div>
     <div style="display:flex;align-items:center;gap:16px">
-      <div class="scroll-btns">
-        <button class="scroll-btn" id="sL2">&#8592;</button>
-        <button class="scroll-btn" id="sR2">&#8594;</button>
-      </div>
       <a href="/pages/catalogo.html?ordem=nota_media" class="see-all">Ver todos →</a>
     </div>
   </div>
@@ -344,14 +336,6 @@ function animateCount(el, target) {
   };
   requestAnimationFrame(step);
 }
-
-function setupScroll(lId, rId, rowId) {
-  const row = document.getElementById(rowId);
-  document.getElementById(lId).addEventListener('click', () => row.scrollBy({left:-440, behavior:'smooth'}));
-  document.getElementById(rId).addEventListener('click', () => row.scrollBy({left: 440, behavior:'smooth'}));
-}
-setupScroll('sL1','sR1','rowLancamentos');
-setupScroll('sL2','sR2','rowMelhores');
 
 const obs = new IntersectionObserver(entries => {
   entries.forEach(e => {

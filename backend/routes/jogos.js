@@ -60,7 +60,7 @@ router.get('/rpg-melhores', async (req, res) => {
        JOIN genero g ON g.id_genero = jg.id_genero_fk
        WHERE g.nome_genero ILIKE 'RPG' AND j.nota_media IS NOT NULL
        ORDER BY j.nota_media DESC, j.total_avaliacoes DESC
-       LIMIT 6`
+       LIMIT 8`
     );
     res.json(r.rows);
   } catch (err) {
