@@ -23,9 +23,9 @@ const api = {
   delete: (path)       => apiFetch(path, { method: 'DELETE' }),
 };
 
-function saveSession(token, nome, perfil) {
+function saveSession(token, id, nome, perfil) {
   localStorage.setItem('token', token);
-  localStorage.setItem('user', JSON.stringify({ nome, perfil }));
+  localStorage.setItem('user', JSON.stringify({ id, nome, perfil }));
 }
 function clearSession() {
   localStorage.removeItem('token');

@@ -44,6 +44,7 @@ router.post('/cadastro', async (req, res) => {
 
     res.status(201).json({
       token,
+      id: r.rows[0].id_usuario,
       nome: nome_usuario,
       perfil: 'Jogador'
     });
@@ -93,6 +94,7 @@ router.post('/login', async (req, res) => {
 
     res.json({
       token,
+      id: user.id_usuario,
       nome: user.nome_usuario,
       perfil: user.nome_perfil
     });

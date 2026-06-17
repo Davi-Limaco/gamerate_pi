@@ -49,28 +49,25 @@ router.get('/destaques', async (req, res) => {
     res.status(500).json({ erro: 'Erro interno' });
   }
 });
- 
-// GET /api/jogos
-router.get('/', async (req, res) => {
-  const {
-    search,
-    genero,
-    plataforma,
-    ordem = 'nome_jogo',
-    dir = 'ASC',
-    page = 1,
-    limit = 20,
-  } = req.query;
- 
-  const ordens = ['nota_media', 'total_avaliacoes', 'data_lancamento', 'nome_jogo'];
-  const dirs = ['ASC', 'DESC'];
-  const safeOrd = ordens.includes(ordem) ? ordem : 'nome_jogo';
-  const safeDir = dirs.includes(dir.toUpperCase()) ? dir.toUpperCase() : 'ASC';
-  const offset = (Math.max(1, parseInt(page)) - 1) * parseInt(limit);
- 
-  const conditions = ['1=1'];
-  const params = [];
-  let idx = 1;
+
+router.get('/rpg-melhores', async (req, res) => {
+  try {
+    const r = await pool.query(
+      `SELECT j.id_jogo, j.nome_jogo, j.desenvolvedora, j.data_lancamento,
+              j.nota_media, j.total_avaliacoes, j.capa
+       FROM jogo j
+       JOIN jogo_genero jg ON jg.id_jogo_fk = j.id_jogo
+       JOIN genero g ON g.id_genero = jg.id_genero_fk
+       WHERE g.nome_genero ILIKE 'RPG' AND j.nota_media IS NOT NULL
+       ORDER BY j.nota_media DESC, j.total_avaliacoes DESC
+       LIMIT 6`
+    );
+    res.json(r.rows);
+  } catch (err) {
+    console.error('rpg-melhores error:', err.message);
+    res.status(500).json({ erro: 'Erro interno' });
+  }
+});
  
   if (search) {
     conditions.push(`j.nome_jogo ILIKE $${idx++}`);

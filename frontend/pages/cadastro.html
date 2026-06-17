@@ -61,7 +61,7 @@ document.getElementById('btnCadastro').addEventListener('click', async () => {
 
   try {
     const data = await api.post('/auth/cadastro', { nome_usuario, email, senha });
-    saveSession(data.token, data.nome, data.perfil);
+    saveSession(data.token, data.id, data.nome, data.perfil);
     window.location.href = '/index.html';
   } catch (e) {
     err.textContent = e.message;

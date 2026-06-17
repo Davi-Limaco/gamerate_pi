@@ -91,20 +91,23 @@ async function loadAvaliacao() {
     curtidas = a.total_curtidas;
 
     const col   = colorFor(a.nome_usuario);
-    const pct   = a.nota ? (parseFloat(a.nota)/5*100).toFixed(0) : 0;
+    const pct   = a.nota ? Math.min(100, Math.max(0, parseFloat(a.nota) / 5 * 100)) : 0;
     const capaEl = a.capa
       ? `<img class="aval-game-capa" src="${a.capa}" alt="${a.nome_jogo}">`
       : `<div class="aval-game-capa"></div>`;
 
     const user    = getUser();
-    const isOwner = user && a.id_usuario === parseInt(getUser()?.id);
+    const isOwner = user && a.id_usuario === user.id;
 
     const commentsHTML = a.comentarios.length
       ? a.comentarios.map(c => `
           <div class="comment-item">
             <div class="comment-avatar" style="background:${colorFor(c.nome_usuario)}">${c.nome_usuario.slice(0,2).toUpperCase()}</div>
             <div class="comment-body">
-              <div class="comment-author">@${c.nome_usuario} <span>${fmtDate(c.data_comentario)}</span></div>
+              <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;">
+                <div class="comment-author">@${c.nome_usuario} <span>${fmtDate(c.data_comentario)}</span></div>
+                ${user && c.id_usuario === user.id ? `<button class="btn btn-danger btn-sm" onclick="event.stopPropagation(); excluirComentario(${c.id_comentario})">Excluir</button>` : ''}
+              </div>
               <div class="comment-text">${c.texto}</div>
             </div>
           </div>`).join('')
@@ -191,6 +194,17 @@ async function enviarComentario() {
     toast('Comentário publicado!', 'success');
     loadAvaliacao();
   } catch(e) { toast(e.message, 'error'); }
+}
+
+async function excluirComentario(id) {
+  if (!confirm('Excluir este comentário?')) return;
+  try {
+    await api.delete(`/avaliacoes/comentarios/${id}`);
+    toast('Comentário excluído', 'success');
+    loadAvaliacao();
+  } catch (e) {
+    toast(e.message, 'error');
+  }
 }
 
 async function excluirAval() {

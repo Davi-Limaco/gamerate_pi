@@ -274,4 +274,28 @@ router.post('/:id/comentar', authRequired, async (req, res) => {
   }
 });
 
+// DELETE /api/avaliacoes/comentarios/:id
+router.delete('/comentarios/:id', authRequired, async (req, res) => {
+  try {
+    const r = await pool.query(
+      'SELECT id_usuario_fk FROM comentario WHERE id_comentario = $1',
+      [req.params.id]
+    );
+
+    if (!r.rows.length) {
+      return res.status(404).json({ erro: 'Comentário não encontrado' });
+    }
+
+    if (r.rows[0].id_usuario_fk !== req.usuario.id && req.usuario.perfil !== 'Administrador') {
+      return res.status(403).json({ erro: 'Sem permissão' });
+    }
+
+    await pool.query('DELETE FROM comentario WHERE id_comentario = $1', [req.params.id]);
+    res.json({ mensagem: 'Comentário excluído' });
+  } catch (err) {
+    console.error(err.message);
+    res.status(500).json({ erro: 'Erro interno' });
+  }
+});
+
 module.exports = router;

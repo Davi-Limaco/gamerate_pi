@@ -167,14 +167,17 @@ async function loadHistorico() {
       return;
     }
     document.getElementById('histList').innerHTML = rows.map(a => `
-      <div class="hist-card" onclick="location.href='/pages/avaliacao.html?id=${a.id_avaliacao}'">
+      <div class="hist-card">
         <img class="hist-capa" src="${a.capa||''}" alt="${a.nome_jogo}" onerror="this.style.background='var(--surface2)';this.src=''">
-        <div class="hist-info">
+        <div class="hist-info" onclick="location.href='/pages/avaliacao.html?id=${a.id_avaliacao}'">
           <div class="hist-game">${a.nome_jogo}</div>
           <div class="hist-titulo">${a.titulo}</div>
           <div style="font-size:11px;color:var(--muted);margin-top:4px">${fmtDate(a.data_publicacao)} · ♥ ${a.total_curtidas}</div>
         </div>
-        <div class="hist-nota">${a.nota}</div>
+        <div style="display:flex;flex-direction:column;align-items:flex-end;gap:8px;">
+          <div class="hist-nota">${a.nota}</div>
+          <button class="btn btn-danger btn-sm" onclick="event.stopPropagation(); excluirAvaliacao(${a.id_avaliacao})">Excluir</button>
+        </div>
       </div>`).join('');
   } catch(e) {
     document.getElementById('histList').innerHTML = `<div class="empty-state"><p>Erro ao carregar.</p></div>`;
@@ -218,7 +221,7 @@ document.getElementById('btnSalvar').addEventListener('click', async () => {
     // Update localStorage nome
     if (nome_usuario) {
       const user = getUser();
-      saveSession(getToken(), nome_usuario, user.perfil);
+      if (user) saveSession(getToken(), user.id, nome_usuario, user.perfil);
       setupNav();
     }
     toast('Perfil atualizado!', 'success');
@@ -229,6 +232,18 @@ document.getElementById('btnSalvar').addEventListener('click', async () => {
     btn.textContent = 'Salvar alterações'; btn.disabled = false;
   }
 });
+
+async function excluirAvaliacao(id) {
+  if (!confirm('Tem certeza que deseja excluir esta avaliação?')) return;
+  try {
+    await api.delete(`/avaliacoes/${id}`);
+    toast('Avaliação excluída!', 'success');
+    loadHistorico();
+    loadPerfil();
+  } catch (e) {
+    toast(e.message, 'error');
+  }
+}
 
 loadPerfil();
 loadHistorico();

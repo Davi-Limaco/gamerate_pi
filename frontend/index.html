@@ -163,6 +163,19 @@
 <section class="section" style="padding-top:0">
   <div class="section-header fade-in">
     <div>
+      <div class="section-title">JOGOS DE <span>RPG</span></div>
+      <div class="section-sub">Os RPGs mais bem avaliados da comunidade</div>
+    </div>
+    <a href="/pages/catalogo.html?genero=RPG&ordem=nota_media" class="see-all">Ver todos →</a>
+  </div>
+  <div class="scroll-row" id="rowRPGMelhores">
+    <div class="empty-state" style="width:100%"><div class="empty-icon">⏳</div><p>Carregando...</p></div>
+  </div>
+</section>
+
+<section class="section" style="padding-top:0">
+  <div class="section-header fade-in">
+    <div>
       <div class="section-title">ANÁLISES EM <span>DESTAQUE</span></div>
       <div class="section-sub">As resenhas mais curtidas da semana</div>
     </div>
@@ -247,7 +260,7 @@ function gameCardHTML(g) {
 
 const COLORS = ['#e8ff47','#ff4f4f','#47c5ff','#ff9f47','#a78bfa','#34d399'];
 function reviewCardHTML(r, i) {
-  const pct = r.nota ? (parseFloat(r.nota)/5*100).toFixed(0) : 0;
+  const pct = r.nota ? Math.min(100, Math.max(0, (parseFloat(r.nota)/5*100))) : 0;
   const col = COLORS[i % COLORS.length];
   return `
     <div class="review-card fade-in" onclick="location.href='/pages/avaliacao.html?id=${r.id_avaliacao}'">
@@ -301,6 +314,15 @@ async function loadHome() {
       ? revs.map((r,i) => reviewCardHTML(r,i)).join('')
       : '<div class="empty-state" style="grid-column:1/-1"><div class="empty-icon">💬</div><p>Nenhuma avaliação ainda.</p></div>';
   } catch(e) { console.error('destaque revs:', e); }
+
+  try {
+    const rpg = await api.get('/jogos/rpg-melhores');
+    document.getElementById('rowRPGMelhores').innerHTML = rpg.length
+      ? rpg.map(gameCardHTML).join('')
+      : '<div class="empty-state" style="width:100%"><div class="empty-icon">🎮</div><p>Nenhum RPG encontrado.</p></div>';
+  } catch(e) {
+    console.error('rpg melh:', e);
+  }
 
   try {
     const gs = await api.get('/generos');
