@@ -60,3 +60,64 @@ INSERT INTO jogo (nome_jogo, desenvolvedora, data_lancamento, descricao, nota_me
 ('Stardew Valley','ConcernedApe','2016-02-26','Herde a fazenda do seu avô e construa uma nova vida no campo.',4.8,1,'https://images.igdb.com/igdb/image/upload/t_cover_big/co1tgt.webp'),
 ('Celeste','Maddy Makes Games','2018-01-25','Madeline escala uma montanha misteriosa enquanto enfrenta seus próprios demônios internos.',4.9,1,'https://images.igdb.com/igdb/image/upload/t_cover_big/co1nf7.webp'),
 ('Deathloop','Arkane Studios','2021-09-14','Colt está preso em um loop temporal em uma ilha e precisa eliminar oito alvos antes da meia-noite.',4.4,1,'https://images.igdb.com/igdb/image/upload/t_cover_big/co2nit.webp');
+
+-- Relacionamentos entre jogos, plataformas e gêneros
+-- Cada jogo recebe ao menos 3 plataformas e 3 gêneros
+
+INSERT INTO jogo_plataforma (id_jogo_fk, id_plataforma_fk)
+SELECT j.id_jogo, p.id_plataforma
+FROM jogo j, plataforma p
+WHERE (j.nome_jogo = 'Elden Ring' AND p.nome_plataforma IN ('PC','PlayStation 5','Xbox Series X'))
+   OR (j.nome_jogo = 'God of War Ragnarök' AND p.nome_plataforma IN ('PlayStation 5','PlayStation 4','PC'))
+   OR (j.nome_jogo = 'Baldur''s Gate 3' AND p.nome_plataforma IN ('PC','PlayStation 5','Xbox Series X'))
+   OR (j.nome_jogo = 'Cyberpunk 2077' AND p.nome_plataforma IN ('PC','PlayStation 5','Xbox Series X'))
+   OR (j.nome_jogo = 'Hollow Knight' AND p.nome_plataforma IN ('PC','Nintendo Switch','PlayStation 4'))
+   OR (j.nome_jogo = 'Red Dead Redemption 2' AND p.nome_plataforma IN ('PC','PlayStation 4','Xbox One'))
+   OR (j.nome_jogo = 'Hades' AND p.nome_plataforma IN ('PC','Nintendo Switch','PlayStation 4'))
+   OR (j.nome_jogo = 'The Witcher 3: Wild Hunt' AND p.nome_plataforma IN ('PC','PlayStation 4','Xbox One'))
+   OR (j.nome_jogo = 'The Last of Us Part II' AND p.nome_plataforma IN ('PC','PlayStation 4','PlayStation 5'))
+   OR (j.nome_jogo = 'Dark Souls III' AND p.nome_plataforma IN ('PC','PlayStation 4','Xbox One'))
+   OR (j.nome_jogo = 'Sekiro: Shadows Die Twice' AND p.nome_plataforma IN ('PC','PlayStation 4','Xbox One'))
+   OR (j.nome_jogo = 'Persona 5 Royal' AND p.nome_plataforma IN ('PC','PlayStation 4','PlayStation 5'))
+   OR (j.nome_jogo = 'Death Stranding' AND p.nome_plataforma IN ('PC','PlayStation 4','PlayStation 5'))
+   OR (j.nome_jogo = 'Ghost of Tsushima' AND p.nome_plataforma IN ('PC','PlayStation 4','PlayStation 5'))
+   OR (j.nome_jogo = 'Disco Elysium' AND p.nome_plataforma IN ('PC','PlayStation 4','PlayStation 5'))
+   OR (j.nome_jogo = 'Resident Evil Village' AND p.nome_plataforma IN ('PC','PlayStation 4','PlayStation 5'))
+   OR (j.nome_jogo = 'Horizon Forbidden West' AND p.nome_plataforma IN ('PC','PlayStation 4','PlayStation 5'))
+   OR (j.nome_jogo = 'Spider-Man: Miles Morales' AND p.nome_plataforma IN ('PC','PlayStation 4','PlayStation 5'))
+   OR (j.nome_jogo = 'It Takes Two' AND p.nome_plataforma IN ('PC','PlayStation 4','Xbox One'))
+   OR (j.nome_jogo = 'Metroid Dread' AND p.nome_plataforma IN ('Nintendo Switch','Wii','Nintendo 3DS'))
+   OR (j.nome_jogo = 'Returnal' AND p.nome_plataforma IN ('PlayStation 5','PC','Xbox Series X'))
+   OR (j.nome_jogo = 'Stardew Valley' AND p.nome_plataforma IN ('PC','Nintendo Switch','PlayStation 4'))
+   OR (j.nome_jogo = 'Celeste' AND p.nome_plataforma IN ('PC','Nintendo Switch','PlayStation 4'))
+   OR (j.nome_jogo = 'Deathloop' AND p.nome_plataforma IN ('PC','PlayStation 4','PlayStation 5'))
+ON CONFLICT DO NOTHING;
+
+INSERT INTO jogo_genero (id_jogo_fk, id_genero_fk)
+SELECT j.id_jogo, g.id_genero
+FROM jogo j, genero g
+WHERE (j.nome_jogo = 'Elden Ring' AND g.nome_genero IN ('Ação','RPG','Aventura'))
+   OR (j.nome_jogo = 'God of War Ragnarök' AND g.nome_genero IN ('Ação','Aventura','RPG'))
+   OR (j.nome_jogo = 'Baldur''s Gate 3' AND g.nome_genero IN ('RPG','Aventura','Estratégia'))
+   OR (j.nome_jogo = 'Cyberpunk 2077' AND g.nome_genero IN ('Ação','RPG','Tiro'))
+   OR (j.nome_jogo = 'Hollow Knight' AND g.nome_genero IN ('Plataforma','Ação','Metroidvania'))
+   OR (j.nome_jogo = 'Red Dead Redemption 2' AND g.nome_genero IN ('Ação','Aventura','Simulação'))
+   OR (j.nome_jogo = 'Hades' AND g.nome_genero IN ('Ação','Roguelike','RPG'))
+   OR (j.nome_jogo = 'The Witcher 3: Wild Hunt' AND g.nome_genero IN ('RPG','Aventura','Ação'))
+   OR (j.nome_jogo = 'The Last of Us Part II' AND g.nome_genero IN ('Ação','Aventura','Survival Horror'))
+   OR (j.nome_jogo = 'Dark Souls III' AND g.nome_genero IN ('Ação','RPG','Aventura'))
+   OR (j.nome_jogo = 'Sekiro: Shadows Die Twice' AND g.nome_genero IN ('Ação','Aventura','RPG'))
+   OR (j.nome_jogo = 'Persona 5 Royal' AND g.nome_genero IN ('RPG','Aventura','Simulação'))
+   OR (j.nome_jogo = 'Death Stranding' AND g.nome_genero IN ('Ação','Aventura','Simulação'))
+   OR (j.nome_jogo = 'Ghost of Tsushima' AND g.nome_genero IN ('Ação','Aventura','RPG'))
+   OR (j.nome_jogo = 'Disco Elysium' AND g.nome_genero IN ('RPG','Aventura','Estratégia'))
+   OR (j.nome_jogo = 'Resident Evil Village' AND g.nome_genero IN ('Terror','Ação','Survival Horror'))
+   OR (j.nome_jogo = 'Horizon Forbidden West' AND g.nome_genero IN ('Ação','Aventura','RPG'))
+   OR (j.nome_jogo = 'Spider-Man: Miles Morales' AND g.nome_genero IN ('Ação','Aventura','RPG'))
+   OR (j.nome_jogo = 'It Takes Two' AND g.nome_genero IN ('Plataforma','Aventura','Puzzle'))
+   OR (j.nome_jogo = 'Metroid Dread' AND g.nome_genero IN ('Plataforma','Ação','Metroidvania'))
+   OR (j.nome_jogo = 'Returnal' AND g.nome_genero IN ('Ação','Roguelike','Tiro'))
+   OR (j.nome_jogo = 'Stardew Valley' AND g.nome_genero IN ('Simulação','RPG','Estratégia'))
+   OR (j.nome_jogo = 'Celeste' AND g.nome_genero IN ('Plataforma','Ação','Puzzle'))
+   OR (j.nome_jogo = 'Deathloop' AND g.nome_genero IN ('Ação','Tiro','Aventura'))
+ON CONFLICT DO NOTHING;
