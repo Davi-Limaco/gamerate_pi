@@ -68,6 +68,101 @@ router.get('/rpg-melhores', async (req, res) => {
     res.status(500).json({ erro: 'Erro interno' });
   }
 });
+
+router.get('/acao-melhores', async (req, res) => {
+  try {
+    const r = await pool.query(
+      `SELECT j.id_jogo, j.nome_jogo, j.desenvolvedora, j.data_lancamento,
+              j.nota_media, j.total_avaliacoes, j.capa
+       FROM jogo j
+       JOIN jogo_genero jg ON jg.id_jogo_fk = j.id_jogo
+       JOIN genero g ON g.id_genero = jg.id_genero_fk
+       WHERE g.nome_genero ILIKE 'Ação' AND j.nota_media IS NOT NULL
+       ORDER BY j.nota_media DESC, j.total_avaliacoes DESC
+       LIMIT 8`
+    );
+    res.json(r.rows);
+  } catch (err) {
+    console.error('acao-melhores error:', err.message);
+    res.status(500).json({ erro: 'Erro interno' });
+  }
+});
+
+router.get('/indie-melhores', async (req, res) => {
+  try {
+    const r = await pool.query(
+      `SELECT j.id_jogo, j.nome_jogo, j.desenvolvedora, j.data_lancamento,
+              j.nota_media, j.total_avaliacoes, j.capa
+       FROM jogo j
+       JOIN jogo_genero jg ON jg.id_jogo_fk = j.id_jogo
+       JOIN genero g ON g.id_genero = jg.id_genero_fk
+       WHERE g.nome_genero ILIKE 'Indie' AND j.nota_media IS NOT NULL
+       ORDER BY j.nota_media DESC, j.total_avaliacoes DESC
+       LIMIT 8`
+    );
+    res.json(r.rows);
+  } catch (err) {
+    console.error('indie-melhores error:', err.message);
+    res.status(500).json({ erro: 'Erro interno' });
+  }
+});
+
+router.get('/estrategia-melhores', async (req, res) => {
+  try {
+    const r = await pool.query(
+      `SELECT j.id_jogo, j.nome_jogo, j.desenvolvedora, j.data_lancamento,
+              j.nota_media, j.total_avaliacoes, j.capa
+       FROM jogo j
+       JOIN jogo_genero jg ON jg.id_jogo_fk = j.id_jogo
+       JOIN genero g ON g.id_genero = jg.id_genero_fk
+       WHERE g.nome_genero ILIKE 'Estratégia' AND j.nota_media IS NOT NULL
+       ORDER BY j.nota_media DESC, j.total_avaliacoes DESC
+       LIMIT 8`
+    );
+    res.json(r.rows);
+  } catch (err) {
+    console.error('estrategia-melhores error:', err.message);
+    res.status(500).json({ erro: 'Erro interno' });
+  }
+});
+
+router.get('/multiplayer-melhores', async (req, res) => {
+  try {
+    const r = await pool.query(
+      `SELECT j.id_jogo, j.nome_jogo, j.desenvolvedora, j.data_lancamento,
+              j.nota_media, j.total_avaliacoes, j.capa
+       FROM jogo j
+       JOIN jogo_genero jg ON jg.id_jogo_fk = j.id_jogo
+       JOIN genero g ON g.id_genero = jg.id_genero_fk
+       WHERE g.nome_genero ILIKE 'Multiplayer' AND j.nota_media IS NOT NULL
+       ORDER BY j.nota_media DESC, j.total_avaliacoes DESC
+       LIMIT 8`
+    );
+    res.json(r.rows);
+  } catch (err) {
+    console.error('multiplayer-melhores error:', err.message);
+    res.status(500).json({ erro: 'Erro interno' });
+  }
+});
+
+router.get('/aventura-melhores', async (req, res) => {
+  try {
+    const r = await pool.query(
+      `SELECT j.id_jogo, j.nome_jogo, j.desenvolvedora, j.data_lancamento,
+              j.nota_media, j.total_avaliacoes, j.capa
+       FROM jogo j
+       JOIN jogo_genero jg ON jg.id_jogo_fk = j.id_jogo
+       JOIN genero g ON g.id_genero = jg.id_genero_fk
+       WHERE g.nome_genero ILIKE 'Aventura' AND j.nota_media IS NOT NULL
+       ORDER BY j.nota_media DESC, j.total_avaliacoes DESC
+       LIMIT 8`
+    );
+    res.json(r.rows);
+  } catch (err) {
+    console.error('aventura-melhores error:', err.message);
+    res.status(500).json({ erro: 'Erro interno' });
+  }
+});
  
 // GET /api/jogos
 router.get('/', async (req, res) => {

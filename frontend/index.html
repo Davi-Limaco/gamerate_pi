@@ -172,13 +172,26 @@
 <section class="section" style="padding-top:0">
   <div class="section-header fade-in">
     <div>
-      <div class="section-title">ANÁLISES EM <span>DESTAQUE</span></div>
-      <div class="section-sub">As resenhas mais curtidas da semana</div>
+      <div class="section-title">JOGOS DE <span>AÇÃO</span></div>
+      <div class="section-sub">Os melhores games de ação da comunidade</div>
     </div>
-    <a href="/pages/catalogo.html" class="see-all">Ver todas →</a>
+    <a href="/pages/catalogo.html?genero=Ação&ordem=nota_media" class="see-all">Ver todos →</a>
   </div>
-  <div class="reviews-grid" id="reviewsGrid">
-    <div class="empty-state" style="grid-column:1/-1"><div class="empty-icon">⏳</div><p>Carregando...</p></div>
+  <div class="scroll-row" id="rowAcaoMelhores">
+    <div class="empty-state" style="width:100%"><div class="empty-icon">⏳</div><p>Carregando...</p></div>
+  </div>
+</section>
+
+<section class="section" style="padding-top:0">
+  <div class="section-header fade-in">
+    <div>
+      <div class="section-title">INDIE <span>GAMES</span></div>
+      <div class="section-sub">Grandes jogos independentes</div>
+    </div>
+    <a href="/pages/catalogo.html?genero=Indie&ordem=nota_media" class="see-all">Ver todos →</a>
+  </div>
+  <div class="scroll-row" id="rowIndieMelhores">
+    <div class="empty-state" style="width:100%"><div class="empty-icon">⏳</div><p>Carregando...</p></div>
   </div>
 </section>
 
@@ -208,6 +221,45 @@
     </div>
 
     <div class="trailer-list" id="trailerList"></div>
+  </div>
+</section>
+
+<section class="section" style="padding-top:0">
+  <div class="section-header fade-in">
+    <div>
+      <div class="section-title">JOGOS DE <span>ESTRATÉGIA</span></div>
+      <div class="section-sub">Os melhores games de estratégia avaliados</div>
+    </div>
+    <a href="/pages/catalogo.html?genero=Estratégia&ordem=nota_media" class="see-all">Ver todos →</a>
+  </div>
+  <div class="scroll-row" id="rowEstrategiaMelhores">
+    <div class="empty-state" style="width:100%"><div class="empty-icon">⏳</div><p>Carregando...</p></div>
+  </div>
+</section>
+
+<section class="section" style="padding-top:0">
+  <div class="section-header fade-in">
+    <div>
+      <div class="section-title">MULTIPLAYER <span>ONLINE</span></div>
+      <div class="section-sub">Os títulos multiplayer mais populares</div>
+    </div>
+    <a href="/pages/catalogo.html?genero=Multiplayer&ordem=nota_media" class="see-all">Ver todos →</a>
+  </div>
+  <div class="scroll-row" id="rowMultiplayerMelhores">
+    <div class="empty-state" style="width:100%"><div class="empty-icon">⏳</div><p>Carregando...</p></div>
+  </div>
+</section>
+
+<section class="section" style="padding-top:0">
+  <div class="section-header fade-in">
+    <div>
+      <div class="section-title">AVENTURA & <span>EXPLORAÇÃO</span></div>
+      <div class="section-sub">Experimente mundos épicos cheios de descobertas</div>
+    </div>
+    <a href="/pages/catalogo.html?genero=Aventura&ordem=nota_media" class="see-all">Ver todos →</a>
+  </div>
+  <div class="scroll-row" id="rowAventuraaMelhores">
+    <div class="empty-state" style="width:100%"><div class="empty-icon">⏳</div><p>Carregando...</p></div>
   </div>
 </section>
 
@@ -306,19 +358,57 @@ async function loadHome() {
   } catch(e) { console.error('destaques:', e); }
 
   try {
-    const revs = await api.get('/avaliacoes/destaque');
-    document.getElementById('reviewsGrid').innerHTML = revs.length
-      ? revs.map((r,i) => reviewCardHTML(r,i)).join('')
-      : '<div class="empty-state" style="grid-column:1/-1"><div class="empty-icon">💬</div><p>Nenhuma avaliação ainda.</p></div>';
-  } catch(e) { console.error('destaque revs:', e); }
-
-  try {
     const rpg = await api.get('/jogos/rpg-melhores');
     document.getElementById('rowRPGMelhores').innerHTML = rpg.length
       ? rpg.map(gameCardHTML).join('')
       : '<div class="empty-state" style="width:100%"><div class="empty-icon">🎮</div><p>Nenhum RPG encontrado.</p></div>';
   } catch(e) {
     console.error('rpg melh:', e);
+  }
+
+  try {
+    const acao = await api.get('/jogos/acao-melhores');
+    document.getElementById('rowAcaoMelhores').innerHTML = acao.length
+      ? acao.map(gameCardHTML).join('')
+      : '<div class="empty-state" style="width:100%"><div class="empty-icon">💥</div><p>Nenhum jogo de ação encontrado.</p></div>';
+  } catch(e) {
+    console.error('acao melh:', e);
+  }
+
+  try {
+    const indie = await api.get('/jogos/indie-melhores');
+    document.getElementById('rowIndieMelhores').innerHTML = indie.length
+      ? indie.map(gameCardHTML).join('')
+      : '<div class="empty-state" style="width:100%"><div class="empty-icon">🎨</div><p>Nenhum indie game encontrado.</p></div>';
+  } catch(e) {
+    console.error('indie melh:', e);
+  }
+
+  try {
+    const estrategia = await api.get('/jogos/estrategia-melhores');
+    document.getElementById('rowEstrategiaMelhores').innerHTML = estrategia.length
+      ? estrategia.map(gameCardHTML).join('')
+      : '<div class="empty-state" style="width:100%"><div class="empty-icon">♟️</div><p>Nenhum jogo de estratégia encontrado.</p></div>';
+  } catch(e) {
+    console.error('estrategia melh:', e);
+  }
+
+  try {
+    const multiplayer = await api.get('/jogos/multiplayer-melhores');
+    document.getElementById('rowMultiplayerMelhores').innerHTML = multiplayer.length
+      ? multiplayer.map(gameCardHTML).join('')
+      : '<div class="empty-state" style="width:100%"><div class="empty-icon">👥</div><p>Nenhum jogo multiplayer encontrado.</p></div>';
+  } catch(e) {
+    console.error('multiplayer melh:', e);
+  }
+
+  try {
+    const aventura = await api.get('/jogos/aventura-melhores');
+    document.getElementById('rowAventuraaMelhores').innerHTML = aventura.length
+      ? aventura.map(gameCardHTML).join('')
+      : '<div class="empty-state" style="width:100%"><div class="empty-icon">🗺️</div><p>Nenhum jogo de aventura encontrado.</p></div>';
+  } catch(e) {
+    console.error('aventura melh:', e);
   }
 
   try {
