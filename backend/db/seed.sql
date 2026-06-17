@@ -17,6 +17,28 @@ SELECT 'Admin','admin@gamerate.com',
 FROM perfil WHERE nome_perfil = 'Administrador'
 ON CONFLICT (email) DO NOTHING;
 
+-- Usuários de exemplo
+INSERT INTO usuario (nome_usuario, email, senha, id_perfil_fk, data_criacao)
+SELECT 'Lara Silva','lara@gamerate.com',
+       '$2a$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi',
+       id_perfil, CURRENT_DATE
+FROM perfil WHERE nome_perfil = 'Jogador'
+ON CONFLICT (email) DO NOTHING;
+
+INSERT INTO usuario (nome_usuario, email, senha, id_perfil_fk, data_criacao)
+SELECT 'Rafael Gomes','rafael@gamerate.com',
+       '$2a$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi',
+       id_perfil, CURRENT_DATE
+FROM perfil WHERE nome_perfil = 'Jogador'
+ON CONFLICT (email) DO NOTHING;
+
+INSERT INTO usuario (nome_usuario, email, senha, id_perfil_fk, data_criacao)
+SELECT 'Marta Lima','marta@gamerate.com',
+       '$2a$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi',
+       id_perfil, CURRENT_DATE
+FROM perfil WHERE nome_perfil = 'Jogador'
+ON CONFLICT (email) DO NOTHING;
+
 -- Plataformas
 INSERT INTO plataforma (nome_plataforma) VALUES
   ('PC'),('PlayStation 5'),('PlayStation 4'),
@@ -60,6 +82,44 @@ INSERT INTO jogo (nome_jogo, desenvolvedora, data_lancamento, descricao, nota_me
 ('Stardew Valley','ConcernedApe','2016-02-26','Herde a fazenda do seu avô e construa uma nova vida no campo.',4.8,1,'https://images.igdb.com/igdb/image/upload/t_cover_big/co1tgt.webp'),
 ('Celeste','Maddy Makes Games','2018-01-25','Madeline escala uma montanha misteriosa enquanto enfrenta seus próprios demônios internos.',4.9,1,'https://images.igdb.com/igdb/image/upload/t_cover_big/co1nf7.webp'),
 ('Deathloop','Arkane Studios','2021-09-14','Colt está preso em um loop temporal em uma ilha e precisa eliminar oito alvos antes da meia-noite.',4.4,1,'https://images.igdb.com/igdb/image/upload/t_cover_big/co2nit.webp');
+
+-- Avaliações de exemplo para destacar na homepage
+WITH novos AS (
+  VALUES
+    ('Elden Ring','lara@gamerate.com',5.0,'Mundo aberto incrível e combates épicos','Cada chefe é um espetáculo de desafio e recompensa. Lorem ipsum dolor sit amet, consectetuer adipiscing elit.', '2025-08-12'),
+    ('God of War Ragnarök','rafael@gamerate.com',4.8,'Uma jornada nórdica emocionante','História esmagadora, combate visceral e personagens fortes. Uma experiência que se destaca em todos os aspectos.', '2025-08-10'),
+    ('Hades','marta@gamerate.com',4.9,'Roguelike viciante e repleto de estilo','Rejogabilidade excelente, mecânicas afiadas e uma narrativa que cresce a cada tentativa de fuga.', '2025-08-08'),
+    ('Red Dead Redemption 2','lara@gamerate.com',5.0,'Velho Oeste cinematográfico e envolvente','Mundo vivo, personagens memoráveis e um enredo que emociona. Simplesmente obrigatório para fãs de narrativas fortes.', '2025-08-05'),
+    ('Disco Elysium','rafael@gamerate.com',4.7,'Diálogo brilhante e atmosfera única','Um RPG narrativo que prova que história e escolhas são o verdadeiro coração do gênero.', '2025-08-03'),
+    ('Deathloop','marta@gamerate.com',4.6,'Estrutura de loop inteligente e ação estilosa','Combate ágil, desafios criativos e uma curva de aprendizado que recompensa quem explora cada esquina.', '2025-07-30')
+)
+INSERT INTO avaliacao (id_usuario_fk, id_jogo_fk, nota, titulo, texto, data_publicacao)
+SELECT u.id_usuario, j.id_jogo, v.nota, v.titulo, v.texto, v.data_publicacao::date
+FROM novos v
+JOIN usuario u ON u.email = v.email
+JOIN jogo j ON j.nome_jogo = v.nome_jogo
+WHERE NOT EXISTS (
+  SELECT 1 FROM avaliacao a WHERE a.titulo = v.titulo
+);
+
+WITH curtidas AS (
+  VALUES
+    ('Mundo aberto incrível e combates épicos','rafael@gamerate.com','2025-08-13'),
+    ('Mundo aberto incrível e combates épicos','marta@gamerate.com','2025-08-13'),
+    ('Uma jornada nórdica emocionante','lara@gamerate.com','2025-08-11'),
+    ('Rejogabilidade excelente, mecânicas afiadas e uma narrativa que cresce a cada tentativa de fuga.','lara@gamerate.com','2025-08-09'),
+    ('Velho Oeste cinematográfico e envolvente','rafael@gamerate.com','2025-08-06'),
+    ('Velho Oeste cinematográfico e envolvente','marta@gamerate.com','2025-08-06')
+)
+INSERT INTO curtida (id_avaliacao_fk, id_usuario_fk, data_curtida)
+SELECT a.id_avaliacao, u.id_usuario, c.data_curtida::date
+FROM curtidas c
+JOIN avaliacao a ON a.titulo = c.titulo
+JOIN usuario u ON u.email = c.email
+WHERE NOT EXISTS (
+  SELECT 1 FROM curtida cu
+  WHERE cu.id_avaliacao_fk = a.id_avaliacao AND cu.id_usuario_fk = u.id_usuario
+);
 
 -- Relacionamentos entre jogos, plataformas e gêneros
 -- Cada jogo recebe ao menos 3 plataformas e 3 gêneros
