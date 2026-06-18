@@ -185,19 +185,6 @@
 <section class="section" style="padding-top:0">
   <div class="section-header fade-in">
     <div>
-      <div class="section-title">INDIE <span>GAMES</span></div>
-      <div class="section-sub">Grandes jogos independentes</div>
-    </div>
-    <a href="/pages/catalogo.html?genero=Indie&ordem=nota_media" class="see-all">Ver todos →</a>
-  </div>
-  <div class="scroll-row" id="rowIndieMelhores">
-    <div class="empty-state" style="width:100%"><div class="empty-icon">⏳</div><p>Carregando...</p></div>
-  </div>
-</section>
-
-<section class="section" style="padding-top:0">
-  <div class="section-header fade-in">
-    <div>
       <div class="section-title">TRAILERS EM <span>DESTAQUE</span></div>
       <div class="section-sub">Os lançamentos mais aguardados</div>
     </div>
@@ -233,19 +220,6 @@
     <a href="/pages/catalogo.html?genero=Estratégia&ordem=nota_media" class="see-all">Ver todos →</a>
   </div>
   <div class="scroll-row" id="rowEstrategiaMelhores">
-    <div class="empty-state" style="width:100%"><div class="empty-icon">⏳</div><p>Carregando...</p></div>
-  </div>
-</section>
-
-<section class="section" style="padding-top:0">
-  <div class="section-header fade-in">
-    <div>
-      <div class="section-title">MULTIPLAYER <span>ONLINE</span></div>
-      <div class="section-sub">Os títulos multiplayer mais populares</div>
-    </div>
-    <a href="/pages/catalogo.html?genero=Multiplayer&ordem=nota_media" class="see-all">Ver todos →</a>
-  </div>
-  <div class="scroll-row" id="rowMultiplayerMelhores">
     <div class="empty-state" style="width:100%"><div class="empty-icon">⏳</div><p>Carregando...</p></div>
   </div>
 </section>
@@ -376,30 +350,12 @@ async function loadHome() {
   }
 
   try {
-    const indie = await api.get('/jogos/indie-melhores');
-    document.getElementById('rowIndieMelhores').innerHTML = indie.length
-      ? indie.map(gameCardHTML).join('')
-      : '<div class="empty-state" style="width:100%"><div class="empty-icon">🎨</div><p>Nenhum indie game encontrado.</p></div>';
-  } catch(e) {
-    console.error('indie melh:', e);
-  }
-
-  try {
     const estrategia = await api.get('/jogos/estrategia-melhores');
     document.getElementById('rowEstrategiaMelhores').innerHTML = estrategia.length
       ? estrategia.map(gameCardHTML).join('')
       : '<div class="empty-state" style="width:100%"><div class="empty-icon">♟️</div><p>Nenhum jogo de estratégia encontrado.</p></div>';
   } catch(e) {
     console.error('estrategia melh:', e);
-  }
-
-  try {
-    const multiplayer = await api.get('/jogos/multiplayer-melhores');
-    document.getElementById('rowMultiplayerMelhores').innerHTML = multiplayer.length
-      ? multiplayer.map(gameCardHTML).join('')
-      : '<div class="empty-state" style="width:100%"><div class="empty-icon">👥</div><p>Nenhum jogo multiplayer encontrado.</p></div>';
-  } catch(e) {
-    console.error('multiplayer melh:', e);
   }
 
   try {
